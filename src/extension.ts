@@ -1,123 +1,158 @@
-import * as fs from 'fs';
-import * as vscode from 'vscode';
+import * as fs from "fs"
+import * as pathlib from "path"
+import * as vscode from "vscode"
 
-const excludedFiles = ['node_modules', '.git', '.next', '.env'];
+const excludedFiles = ["node_modules", ".git", ".next", ".env"]
 
-function showQuickPick(items: vscode.QuickPickItem[]) {
+function showQuickPick (items: vscode.QuickPickItem[], onSelect: (v: readonly vscode.QuickPickItem[]) => void): void {
+	const quickPick = vscode.window.createQuickPick()
+	quickPick.items = items
 
-	const quickPick = vscode.window.createQuickPick();
-	quickPick.items = items;
+	quickPick.onDidChangeSelection((c) => {
+		onSelect(c)
+		quickPick.hide()
+	})
 
-	quickPick.onDidChangeSelection(selection => {
-		if (selection[0]) {
-			vscode.window.showInformationMessage(`Selected: ${selection[0].label}`);
-		}
-	});
+	quickPick.onDidHide(() => { quickPick.dispose() })
 
-	quickPick.onDidHide(() => quickPick.dispose());
-
-	quickPick.show();
+	quickPick.show()
 }
 
-function getAllFilesAndFoldersRecursively(folderPath: string | undefined, files: string[], folders: string[]) {
-	if (folderPath) {
-		const entries = fs.readdirSync(folderPath);
-		const filteredEntries = entries.filter((v) => !excludedFiles.includes(v));
+async function getAllFilesAndFoldersRecursively (folderPath: string | undefined, files: string[], folders: string[]): Promise<{ files: string[], folders: string[] } | undefined> {
+	if (folderPath !== undefined) {
+		const entries = fs.readdirSync(folderPath)
+		const filteredEntries = entries.filter((v) => !excludedFiles.includes(v))
 
-		filteredEntries.forEach((entry, index) => {
-			const fullPath = `${folderPath}/${entry}`;
-			const stats = fs.statSync(fullPath);
-			const relativePath = vscode.workspace.asRelativePath(fullPath);
+		filteredEntries.forEach((entry) => {
+			const fullPath = `${folderPath}/${entry}`
+			const stats = fs.statSync(fullPath)
+			const relativePath = vscode.workspace.asRelativePath(fullPath)
 
 			if (stats.isDirectory()) {
-				folders.push(relativePath);
-				getAllFilesAndFoldersRecursively(fullPath, files, folders);
+				folders.push(relativePath)
+				void getAllFilesAndFoldersRecursively(fullPath, files, folders)
 			} else {
-				files.push(entry);
+				files.push(entry)
 			}
-		});
-
-		return { files, folders };
+		})
+		return { files, folders }
 	} else {
-		vscode.window.showErrorMessage('No workspace folder is open.');
+		await vscode.window.showErrorMessage("No workspace folder is open.")
 	}
 }
 
-function getAllFilesAndFoldersInCurrentFolder(currentFolder: string | undefined) {
-	if (currentFolder) {
-		fs.readdir(currentFolder, (err, entries) => {
-			if (err) {
-				vscode.window.showErrorMessage('Failed to read folder contents.');
-				return;
-			}
 
-			const files: string[] = [];
-			const folders: string[] = [];
 
-			entries.forEach(entry => {
-				const fullPath = `${currentFolder}/${entry}`;
-				const isDirectory = fs.statSync(fullPath).isDirectory();
+function createFile(filePath: string) {
+	const isDirectory = filePath.endsWith("/")
+	const currentFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath // Get the current workspace folder path
+	const isNested = /(?!^)\/(?!$)/.test(filePath)
 
-				if (isDirectory) {
-					// getAllFilesAndFoldersInCurrentFolder()
-					folders.push(entry);
-				} else {
-					files.push(entry);
+
+	if(currentFolder){
+		const directoryPath = pathlib.dirname(filePath)
+		const currentDirectoryPath =pathlib.join(currentFolder,directoryPath) 
+		const currentFilePath = pathlib.join(currentFolder,filePath )
+		
+		if(isNested) { 
+			// nested directory 
+			// /pages/auth/
+			if (isDirectory) {
+				const currentDirectoryPath =pathlib.join(currentFolder,filePath) 
+				if(!fs.existsSync(directoryPath)) { 
+					fs.mkdirSync(currentDirectoryPath, { recursive: true })
+					console.log(`'${filePath}' created successfully!`)
+				}else {
+					console.log(`'${filePath}' already exists`)
 				}
-			});
+			} else {
+			// nested file 
+			// /pages/auth/index.js
+				if(!fs.existsSync(directoryPath)) { 
+					fs.mkdirSync(currentDirectoryPath, { recursive: true })
+					fs.writeFileSync(currentFilePath, "")
+					try {
+						vscode.workspace.openTextDocument(currentFilePath)
+							.then((doc) => {
+								vscode.window.showTextDocument(doc)
+							})
+							.then( ()=> {
+								console.log(`File '${filePath}' created successfully!`)
+							})
+					} catch (error) {
+						console.log("========  error:", error)
+					}
+				}else {
+					console.log(`'${filePath}' already exists`)
+				}
+			} 
+		}
+		else if (isDirectory) {
 
-			vscode.window.showInformationMessage(`Files in current folder: ${files.join(', ')}`);
-			vscode.window.showInformationMessage(`Folders in current folder: ${folders.join(', ')}`);
-		});
-	} else {
-		vscode.window.showErrorMessage('No workspace folder is open.');
+			// root directory 
+			// /pages/
+			const currentDirectoryPath =pathlib.join(currentFolder,filePath) 
+			if(!fs.existsSync(filePath)) { 
+				console.log("========  filePath:", filePath)
+				fs.mkdirSync(currentDirectoryPath, { recursive: true })
+				console.log(`'${filePath}' created successfully!`)
+			}else {
+				console.log(`'${filePath}' already exists`)
+			}
+		}
+		else { 
+			// root file 
+			// /index.ts
+			console.log("========  currentFilePath:", currentFilePath)
+			try {
+				fs.writeFileSync(currentFilePath, "")
+				vscode.workspace.openTextDocument(currentFilePath)
+					.then((doc) => {
+						vscode.window.showTextDocument(doc)
+					})
+					.then( ()=> {
+						console.log(`File '${filePath}' created successfully!`)
+					})
+			} catch (error) {
+				console.log("========  error:", error)
+			}
+		}
 	}
 }
-function createNewFile() {
-	vscode.window.showInputBox({
-		prompt: 'Enter the file name',
-		placeHolder: 'myFile.txt',
-	}).then((fileName) => {
-		if (fileName) {
-			const filePath = vscode.workspace.rootPath + '/' + fileName;
-			fs.writeFileSync(filePath, ''); // Create an empty file
 
-			vscode.workspace.openTextDocument(filePath).then((doc) => {
-				vscode.window.showTextDocument(doc);
-			});
-		}
-	});
-}
+export function activate (context: vscode.ExtensionContext): void {
+	const disposable = vscode.commands.registerCommand("file-template-manager.helloWorld", async () => {
+		const currentFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath // Get the current workspace folder path
 
-export function activate(context: vscode.ExtensionContext) {
+		const files: string[] = []
+		const folders: string[] = []
+		const data = await getAllFilesAndFoldersRecursively(currentFolder, files, folders)
 
-
-	let disposable = vscode.commands.registerCommand('file-template-manager.helloWorld', () => {
-		// createNewFile();
-
-		const currentFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath; // Get the current workspace folder path
-
-
-		const files: string[] = [];
-		const folders: string[] = [];
-		const data = getAllFilesAndFoldersRecursively(currentFolder, files, folders);
-
-		const items: vscode.QuickPickItem[] = [
-			{ label: 'Option 1', description: 'First option' },
-			{ label: 'Option 2', description: 'Second option' },
-			{ label: 'Option 3', description: 'Third option' }
-		];
 		const a = data?.folders.map((v) => {
 			return {
-				label: v
-			};
-		});
-		if (a) { showQuickPick(a); }
-		// vscode.window.showInformationMessage('Hello World from file-template-manager!');
-	});
+				label: `/${ v }`
+			}
+		})
 
-	context.subscriptions.push(disposable);
+		a?.unshift({ label: "/"  })
+
+		if (a != null) {
+			showQuickPick(a, selection => {
+				const inputPrompt = {
+					prompt: "Enter the file name",
+					placeHolder: "newfile.txt"
+				}
+				vscode.window.showInputBox(inputPrompt)
+					.then((inputVal) => {
+						if(inputVal)
+							createFile(pathlib.join( selection[0].label ,  inputVal ))
+					})
+			})
+		}
+	})
+
+	context.subscriptions.push(disposable)
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() { }
+// export function deactivate () { }
