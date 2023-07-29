@@ -17,7 +17,7 @@
     "commands": [
       {
         "command": "file-template-manager.helloWorld",
-        "title": "Hello World"
+        "title": "Create New File"
       }
     ]
   },
@@ -39,6 +39,8 @@
     "@vscode/test-electron": "^2.3.2",
     "eslint": "^8.44.0",
     "eslint-config-standard-with-typescript": "^36.0.0",
+    "eslint-plugin-align-assignments": "^1.1.2",
+    "eslint-plugin-align-import": "^1.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
