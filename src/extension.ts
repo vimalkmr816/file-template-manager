@@ -64,7 +64,6 @@ async function createFile ( filePath: string ) {
 
 				if ( !fs.existsSync ( directoryPath ) ) {
 					fs.mkdirSync ( currentDirectoryPath, { recursive : true } );
-
 					await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 				} else {
 					await vscode.window.showInformationMessage ( `'${ filePath }' already exists` );
@@ -81,7 +80,7 @@ async function createFile ( filePath: string ) {
 								vscode.window.showTextDocument ( doc );
 							} )
 							.then ( async () => {
-								await vscode.window.showErrorMessage ( `'${ filePath }' created successfully!` );
+								await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 							} );
 					} catch ( error ) {
 						await vscode.window.showErrorMessage ( GENERIC_ERROR );
@@ -98,7 +97,7 @@ async function createFile ( filePath: string ) {
 
 			if ( !fs.existsSync ( filePath ) ) {
 				fs.mkdirSync ( currentDirectoryPath, { recursive : true } );
-				await vscode.window.showErrorMessage ( `'${ filePath }' created successfully!` );
+				await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 			} else {
 				await vscode.window.showErrorMessage ( `'${ filePath }' already exists` );
 			}
