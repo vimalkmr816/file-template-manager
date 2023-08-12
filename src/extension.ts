@@ -2,6 +2,71 @@ import * as fs      from "fs";
 import * as pathlib from "path";
 import * as vscode  from "vscode";
 import path = require( "path" );
+const ignoredFiles: string[] = [
+	// Node.js / JavaScript
+	"node_modules",
+	".npm",
+
+	// Python
+	"__pycache__",
+	".venv",
+	"venv",
+	".virtualenv",
+
+	// Java
+	"target",
+
+	// Editor/IDE-specific
+	".vscode",
+	".idea",
+	".vs",
+
+	// Build and Output Artifacts
+	"build",
+	"dist",
+	"out",
+
+	// Compiled Files
+	"*.class",
+	"*.dll",
+	"*.exe",
+	"*.o",
+	"*.pyc",
+	"*.jar",
+	"*.war",
+	"*.so",
+	"*.a",
+	"*.lib",
+
+	// Logs and Temporary Files
+	"*.log",
+	"*.tmp",
+	"*.swp",
+
+	// Configuration and Environment Files
+	".env",
+	".env.local",
+	".env.*",
+
+	// Dependency Management
+	"yarn.lock",
+	"package-lock.json",
+	"pipfile.lock",
+	"Gemfile.lock",
+
+	// User-specific and Sensitive Data
+	".DS_Store",
+	".gitignore",
+	".gitattributes",
+	".editorconfig",
+	".env.local",
+	".env.*.local",
+	".history",
+	".bash_history",
+	".zsh_history",
+	".config",
+	".ssh"
+];
 
 const excludedFiles      = [ "node_modules", ".git", ".next", ".env" ];
 const GENERIC_ERROR      = "Oops! Something went wrong. We're on it!";
@@ -27,7 +92,7 @@ function showQuickPick ( items: vscode.QuickPickItem[], onSelect: ( v: readonly 
 async function getAllFilesAndFoldersRecursively ( folderPath: string | undefined, files: string[], folders: string[] ): Promise<string[] | undefined> {
 	if ( folderPath !== undefined ) {
 		const entries         = fs.readdirSync ( folderPath );
-		const filteredEntries = entries.filter ( v => !excludedFiles.includes ( v ) );
+		const filteredEntries = entries.filter ( v => !ignoredFiles.includes ( v ) );
 
 		filteredEntries.forEach ( ( entry, index ) => {
 			const fullPath     = `${ folderPath }/${ entry }`;
@@ -64,7 +129,6 @@ async function createFile ( filePath: string ) {
 
 				if ( !fs.existsSync ( directoryPath ) ) {
 					fs.mkdirSync ( currentDirectoryPath, { recursive : true } );
-
 					await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 				} else {
 					await vscode.window.showInformationMessage ( `'${ filePath }' already exists` );
@@ -81,7 +145,7 @@ async function createFile ( filePath: string ) {
 								vscode.window.showTextDocument ( doc );
 							} )
 							.then ( async () => {
-								await vscode.window.showErrorMessage ( `'${ filePath }' created successfully!` );
+								await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 							} );
 					} catch ( error ) {
 						await vscode.window.showErrorMessage ( GENERIC_ERROR );
@@ -98,7 +162,7 @@ async function createFile ( filePath: string ) {
 
 			if ( !fs.existsSync ( filePath ) ) {
 				fs.mkdirSync ( currentDirectoryPath, { recursive : true } );
-				await vscode.window.showErrorMessage ( `'${ filePath }' created successfully!` );
+				await vscode.window.showInformationMessage ( `'${ filePath }' created successfully!` );
 			} else {
 				await vscode.window.showErrorMessage ( `'${ filePath }' already exists` );
 			}
@@ -136,7 +200,7 @@ const splitInput = ( str: string ) => {
 };
 
 export function activate ( context: vscode.ExtensionContext ): void {
-	const disposable = vscode.commands.registerCommand ( "file-template-manager.helloWorld", async () => {
+	const disposable = vscode.commands.registerCommand ( "quick-file.createNewFile", async () => {
 		const currentFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath; // Get the current workspace folder path
 
 		const files: string[]   = [];
