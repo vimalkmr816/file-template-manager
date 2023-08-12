@@ -1,22 +1,26 @@
 {
-  "name": "file-template-manager",
-  "displayName": "file-template-manager",
+  "name": "quick-file",
+  "displayName": "quick-file",
   "description": "",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vimalkmr816/quick-file.git"
+  },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onCommand:file-template-manager.helloWorld"
+    "onCommand:quick-file.createNewFile"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "file-template-manager.helloWorld",
+        "command": "quick-file.createNewFile",
         "title": "Create New File"
       }
     ]

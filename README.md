@@ -1,13 +1,40 @@
-# file-template-manager README
-
-This is the README for your extension "file-template-manager". After writing up a brief description, we recommend including the following sections.
+# QuikFile
+How about a cool VS Code extension that lets you whip up new files in a jiffy using just your keyboard? No more file-creating hassles – we've  got your back! 🚀
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Create files quickly with `/some/file.ts`.
+- Create folders quickly with `/some/folder`.
+- Create multiple files and folders quickly with `{index.tsx, container, styles}.ts`.
 
-For example if there is an image subfolder under your extension project workspace:
 
-\!\[feature X\]\(images/feature-x.png\)
+![Extension Demo](/assets/example.gif)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Top-secret stuff that's cooking up: features in the making, shhh! 🤫
+- Keyboard shortcut to directly launch the extension
+- File template support (`newfolder/--myTemplate`)
+- and all other file operations with only keyboard
+
+## Contributing
+
+Contributions are welcome! Here's how you can get involved:
+
+1. Fork the repository.
+2. Create a new branch for your feature/bug fix: `git checkout -b feature/your-feature-name`.
+3. Make your changes and commit them: `git commit -m "Add your commit message here"`.
+4. Push to the branch: `git push origin feature/your-feature-name`.
+5. Create a pull request describing your changes.
+
+Please ensure your pull request follows these guidelines:
+
+- Clearly describe the purpose and scope of your changes.
+- Make sure your code follows the project's coding style and guidelines.
+- Provide test cases if applicable.
+- Keep your pull request focused; avoid including unrelated changes.
+- Be patient during the review process and be ready to address feedback.
+
+Thank you for helping improve this project!
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) file for details.
