@@ -38,3 +38,6 @@ Thank you for helping improve this project!
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt) file for details.
+
+#### Icon from
+<a href="https://www.vecteezy.com/free-png/file">File PNGs by Vecteezy</a>

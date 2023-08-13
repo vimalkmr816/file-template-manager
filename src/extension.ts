@@ -57,6 +57,7 @@ const ignoredFiles: string[] = [
 	// User-specific and Sensitive Data
 	".DS_Store",
 	".gitignore",
+	".git",
 	".gitattributes",
 	".editorconfig",
 	".env.local",
